@@ -69,7 +69,7 @@
  *       in binary floating point serialization as desired by some boost users.
  *       Instead we support only the most widely used IEEE 754 format and try to
  *       detect when requirements are not met and hence our approach must fail.
- *       Contributions we made by Johan Rade and ¡kos MarÛy.
+ *       Contributions we made by Johan Rade and √Åkos Mar√≥y.
  *
  * \note Version 2.0 fixes a serious bug that effectively transformed most
  *       of negative integral values into positive values! For example the two
@@ -120,6 +120,10 @@
 #elif BOOST_VERSION < 104800
 #include <boost/spirit/home/support/detail/integer/endian.hpp>
 #include <boost/spirit/home/support/detail/math/fpclassify.hpp>
+#elif BOOST_VERSION >= 106900
+#define BOOST_MATH_DISABLE_STD_FPCLASSIFY
+#include <boost/math/special_functions/fpclassify.hpp>
+#include <boost/endian/conversion.hpp>
 #else
 #include <boost/spirit/home/support/detail/endian/endian.hpp>
 #include <boost/spirit/home/support/detail/math/fpclassify.hpp>
@@ -128,6 +132,8 @@
 // namespace alias fp_classify
 #if BOOST_VERSION < 103800
 namespace fp = boost::math;
+#elif BOOST_VERSION >= 106900
+namespace fp = boost::math;
 #else
 namespace fp = boost::spirit::math;
 #endif
@@ -135,6 +141,8 @@ namespace fp = boost::spirit::math;
 // namespace alias endian
 #if BOOST_VERSION < 104800
 namespace endian = boost::detail;
+#elif BOOST_VERSION >= 106900
+namespace endian = boost::endian;
 #else
 namespace endian = boost::spirit::detail;
 #endif
@@ -328,8 +336,11 @@ namespace eos {
 
 				// we choose to use little endian because this way we just
 				// save the first size bytes to the stream and skip the rest
-				endian::store_little_endian<T, sizeof(T)>(&temp, t);
-
+                                #if BOOST_VERSION >= 106900
+				temp = endian::native_to_little(temp);
+                                #else
+                                endian::store_little_endian<T, sizeof(T)>(&temp, t);
+                                #endif
 				save_binary(&temp, size);
 			}
 			// zero optimization
@@ -387,10 +398,14 @@ namespace eos {
 			switch (fp::fpclassify(t))
 			{
 			//case FP_ZERO: bits = 0; break; 
-			case FP_NAN: bits = traits::exponent | traits::mantissa; break;
+                        #if BOOST_VERSION >= 106900
+			case FP_NAN: bits = traits::exponent | traits::significand; break;
+                        #else
+                        case FP_NAN: bits = traits::exponent | traits::mantissa; break;
+                        #endif
 			case FP_INFINITE: bits = traits::exponent | (t<0) * traits::sign; break;
 			case FP_SUBNORMAL: assert(std::numeric_limits<T>::has_denorm); // pass
-			case FP_ZERO: // note that floats can be ±0.0
+			case FP_ZERO: // note that floats can be ¬±0.0
 			case FP_NORMAL: traits::get_bits(t, bits); break;
 			default: throw portable_archive_exception(t);
 			}

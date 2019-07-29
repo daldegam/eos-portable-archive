@@ -66,7 +66,7 @@
  *       in binary floating point serialization as desired by some boost users.
  *       Instead we support only the most widely used IEEE 754 format and try to
  *       detect when requirements are not met and hence our approach must fail.
- *       Contributions we made by Johan Rade and ¡kos MarÛy.
+ *       Contributions we made by Johan Rade and √Åkos Mar√≥y.
  *
  * \note Version 2.0 fixes a serious bug that effectively transformed most
  *       of negative integral values into positive values! For example the two
@@ -117,6 +117,10 @@
 #elif BOOST_VERSION < 104800
 #include <boost/spirit/home/support/detail/integer/endian.hpp>
 #include <boost/spirit/home/support/detail/math/fpclassify.hpp>
+#elif BOOST_VERSION >= 106900
+#define BOOST_MATH_DISABLE_STD_FPCLASSIFY
+#include <boost/math/special_functions/fpclassify.hpp>
+#include <boost/endian/conversion.hpp>
 #else
 #include <boost/spirit/home/support/detail/endian/endian.hpp>
 #include <boost/spirit/home/support/detail/math/fpclassify.hpp>
@@ -125,6 +129,8 @@
 // namespace alias
 #if BOOST_VERSION < 103800
 namespace fp = boost::math;
+#elif BOOST_VERSION >= 106900
+namespace fp = boost::math;
 #else
 namespace fp = boost::spirit::math;
 #endif
@@ -132,6 +138,8 @@ namespace fp = boost::spirit::math;
 // namespace alias endian
 #if BOOST_VERSION < 104800
 namespace endian = boost::detail;
+#elif BOOST_VERSION >= 106900
+namespace endian = boost::endian;
 #else
 namespace endian = boost::spirit::detail;
 #endif
@@ -350,7 +358,11 @@ namespace eos {
 
 				// load the value from little endian - it is then converted
 				// to the target type T and fits it because size <= sizeof(T)
-				t = endian::load_little_endian<T, sizeof(T)>(&temp);
+                                #if BOOST_VERSION >= 106900
+				t = endian::little_to_native(temp);
+                                #else
+                                t = endian::load_little_endian<T, sizeof(T)>(&temp);
+                                #endif
 			}
 
 			else t = 0; // zero optimization
