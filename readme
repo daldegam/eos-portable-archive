@@ -2,7 +2,7 @@ Project Description
 
 This C++ project provides a portable binary archive to be used with boost::serialization.
 
-When using boost::serialization to make C++ data structures persistent you have different options for for the storage format. The library provides you with different archives to be used together with the serialization framework, you will find XML, ASCII and a binary implementation. The thing about the binary archive is that it was designed for optimal speed and not for portability across different platforms. This is where the EOS portable archive fills the gap, bringing both execution speed and a platform independent space-efficient binary packing.
+When using boost::serialization to make C++ data structures persistent you have different options for the storage format. The library provides you with different archives to be used together with the serialization framework, you will find XML, ASCII and a binary implementation. The thing about the binary archive is that it was designed for optimal speed and not for portability across different platforms. This is where the EOS portable archive fills the gap, bringing both execution speed and a platform independent space-efficient binary packing.
 Project History
 
 The archive was created at EOS for its projects and first published on boost vault. The code is designed to work as header-only addition to boost starting with version 1.33.1. We provide full backwards compatibility to prior releases and with most features also forward compatibility was achieved since the data format itself did not change.
