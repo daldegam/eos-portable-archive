@@ -1,3 +1,16 @@
+Please note, I am not the creator of this project, but: Christian Pfligersdorffer.
+I found this project many years ago and I just can't find it for download anymore, so I decided to upload it again.
+
+For more information see: release_notes.txt.
+
+---
+
+I recommend using a new project called YAS.
+https://github.com/niXman/yas
+
+---
+
+
 Project Description
 
 This C++ project provides a portable binary archive to be used with boost::serialization.
